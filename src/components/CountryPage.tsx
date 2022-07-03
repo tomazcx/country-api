@@ -33,6 +33,11 @@ export const CountryPage = () => {
         const capitalArray = data.capital?? "Not identified"
         const capital = typeof capitalArray === "string" ? capitalArray : capitalArray[0]
 
+        const languagesArray =  data.languages
+        let languages = []
+        languages = languagesArray.map((language: any) => {
+            return `${language.name} `
+        })
 
         const country:CountryPageInterface ={
             name: data.name,
@@ -43,7 +48,7 @@ export const CountryPage = () => {
             capital: capital,
             domain: data.topLevelDomain,
             currencies: data.currencies[0].name,
-            languages: data.languages,
+            languages: languages,
             borders: data.borders,
             flag: data.flag
         }
@@ -74,7 +79,7 @@ export const CountryPage = () => {
                         <div className="flex flex-col gap-4">
                             <span><span className="font-bold">Top level domain:</span> <span>{countryInfo?.domain}</span> </span>
                             <span><span className="font-bold">Currencies:</span> <span>{countryInfo?.currencies}</span> </span>
-                            <span><span className="font-bold">Languages:</span> <span>Dutch, French, German</span> </span>
+                            <span><span className="font-bold">Languages:</span> <span>{countryInfo?.languages}</span> </span>
                         </div>
 
                     </div>
