@@ -16,8 +16,8 @@ export const Page = () => {
 
     const [countriesList, setCountries] = useState<CountryPageInterface[]>([])
     const [inputText, setText] = useState("")
-    const [searchedByName, setSearched] = useState(false)
-    const [arrayToRender, setArray] = useState<CountryPageInterface[]>(countriesList)
+    const [arrayToRender, setArray] = useState<CountryPageInterface[]>([])
+    const [arrayToSearch, setArrayToSearch] = useState<CountryPageInterface[]>([])
 
     useEffect(() => {
         getCountries()
@@ -44,49 +44,62 @@ export const Page = () => {
         })
         setCountries(countries)
         setArray(countries)
+        setArrayToSearch(countries)
 
     }
 
 
     const renderByRegion = (region: number) => {
+        const array = []
         switch (region) {
             case 1:
                 const africaCountries = countriesList.filter(country => country.region === "Africa")
+                setArrayToSearch(africaCountries)
                 searchCountry(inputText, africaCountries)
                 break;
             case 2:
                 const americaCountries = countriesList.filter(country => country.region === "Americas")
+                setArrayToSearch(americaCountries)
                 searchCountry(inputText, americaCountries)
                 break;
             case 3:
                 const asiaCountries = countriesList.filter(country => country.region === "Asia")
+                setArrayToSearch(asiaCountries)
                 searchCountry(inputText, asiaCountries)
                 break;
             case 4:
                 const europeCountries = countriesList.filter(country => country.region === "Europe")
+                setArrayToSearch(europeCountries)
                 searchCountry(inputText, europeCountries)
                 break;
             case 5:
                 const oceaniaCountries = countriesList.filter(country => country.region === "Oceania")
+                setArrayToSearch(oceaniaCountries)
                 searchCountry(inputText, oceaniaCountries)
                 break;
             default:
+                setArrayToSearch(countriesList)
                 searchCountry(inputText, countriesList)
                 break;
         }
     }
 
     const searchCountry = (country : string, array : CountryPageInterface[]) =>{
-        const countryLower = country.toLowerCase()
+        if(country !== ""){
+            const countryLower = country.toLowerCase()
 
-        const newArray = array.filter(item => {
-            const itemName = item.name.toLowerCase()
-            if(itemName.includes(countryLower)){
-                return item
-            }
-        })
-       
-        setArray(newArray)
+            const newArray = array.filter(item => {
+                const itemName = item.name.toLowerCase()
+                if(itemName.includes(countryLower)){
+                    return item
+                }
+            })
+           
+            return setArray(newArray)
+            
+        }
+        return setArray(array)
+
     }
 
     return (
@@ -96,9 +109,9 @@ export const Page = () => {
                     <MagnifyingGlass size={20} className="cursor-pointer" onClick={() =>  searchCountry(inputText, arrayToRender)} />
                     <input type="text" onKeyDown={e => {
                         if(e.key === "Enter"){
-                            searchCountry(inputText, arrayToRender)
+                            searchCountry(inputText, arrayToSearch)
                         }
-                    }} onChange={e => setText(e.target.value)} className="outline-none bg-transparent" placeholder="Search for a country" />
+                    }} onChange={e => searchCountry(e.target.value, arrayToSearch)} className="outline-none bg-transparent" placeholder="Search for a country" />
                 </div>
 
                 <select onChange={e => renderByRegion(Number(e.target.value))} name="region" id="region" className="dark:bg-blue-700 transition-colors bg-gray-200 outline-none p-4 w-[250px] border-none rounded shadow-md" placeholder="Filter by region">
