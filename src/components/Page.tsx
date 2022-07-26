@@ -2,6 +2,8 @@ import { MagnifyingGlass } from "phosphor-react"
 import { Country } from "./Country"
 import axios from 'axios'
 import { useEffect, useState } from "react"
+import { useQuery } from 'react-query'
+import { Loading } from "./Loading"
 
 interface CountryPageInterface {
     name: string;
@@ -14,89 +16,43 @@ interface CountryPageInterface {
 
 export const Page = () => {
 
-    const [countriesList, setCountries] = useState<CountryPageInterface[]>([])
-    const [inputText, setText] = useState("")
-    const [arrayToRender, setArray] = useState<CountryPageInterface[]>([])
-    const [arrayToSearch, setArrayToSearch] = useState<CountryPageInterface[]>([])
-
-    useEffect(() => {
-        getCountries()
-    }, [])
+    const [regionId, setRegionId] = useState("all")
 
 
-    async function getCountries() {
-        const result = await axios.get("https://restcountries.com/v2/all?fields=name,capital,region,population,flag")
-        const data = await result.data
-
-        const countries: CountryPageInterface[] = []
-        let count = 0;
-        data.forEach((country: any) => {
-            count += 1;
-            const capital = country.capital ?? "Not identified"
-            const countryObj: CountryPageInterface = {
-                name: country.name,
-                population: country.population,
-                region: country.region,
-                capital: capital,
-                flag: country.flag
-            }
-            countries.push(countryObj)
-        })
-        setCountries(countries)
-        setArray(countries)
-        setArrayToSearch(countries)
-
-    }
-
-
-    const renderByRegion = (region: number) => {
-        const array = []
-        switch (region) {
-            case 1:
-                const africaCountries = countriesList.filter(country => country.region === "Africa")
-                setArrayToSearch(africaCountries)
-                searchCountry(inputText, africaCountries)
-                break;
-            case 2:
-                const americaCountries = countriesList.filter(country => country.region === "Americas")
-                setArrayToSearch(americaCountries)
-                searchCountry(inputText, americaCountries)
-                break;
-            case 3:
-                const asiaCountries = countriesList.filter(country => country.region === "Asia")
-                setArrayToSearch(asiaCountries)
-                searchCountry(inputText, asiaCountries)
-                break;
-            case 4:
-                const europeCountries = countriesList.filter(country => country.region === "Europe")
-                setArrayToSearch(europeCountries)
-                searchCountry(inputText, europeCountries)
-                break;
-            case 5:
-                const oceaniaCountries = countriesList.filter(country => country.region === "Oceania")
-                setArrayToSearch(oceaniaCountries)
-                searchCountry(inputText, oceaniaCountries)
-                break;
-            default:
-                setArrayToSearch(countriesList)
-                searchCountry(inputText, countriesList)
-                break;
+    const fetchCountries = async (region: string) => {
+        let result;
+        if (region === 'all') {
+            result = await axios.get(`https://restcountries.com/v2/all?fields=name,capital,region,population,flag`)
+        } else {
+            result = await axios.get(`https://restcountries.com/v2/region/${region}?fields=name,capital,region,population,flag`)
         }
+        setArray(result.data)
+        return result.data
+
     }
 
-    const searchCountry = (country : string, array : CountryPageInterface[]) =>{
-        if(country !== ""){
+    const { data, isFetching, refetch } = useQuery<CountryPageInterface>(['countries', regionId], () => fetchCountries(regionId), {
+        refetchOnWindowFocus: false,
+        refetchOnMount: false
+    })
+
+    const [inputText] = useState("")
+    const [arrayToRender, setArray] = useState<CountryPageInterface[]>(data)
+
+
+    const searchCountry = (country: string, array: CountryPageInterface[]) => {
+        if (country !== "") {
             const countryLower = country.toLowerCase()
 
             const newArray = array.filter(item => {
                 const itemName = item.name.toLowerCase()
-                if(itemName.includes(countryLower)){
+                if (itemName.includes(countryLower)) {
                     return item
                 }
             })
-           
+
             return setArray(newArray)
-            
+
         }
         return setArray(array)
 
@@ -106,26 +62,35 @@ export const Page = () => {
         <main className="w-11/12">
             <div className="flex flex-col gap-8 sm:justify-between sm:items-center sm:flex-row">
                 <div className="dark:bg-blue-700 transition-colors bg-gray-200 shadow-md flex items-center gap-4 rounded-md p-4 w-full sm:w-[400px]">
-                    <MagnifyingGlass size={20} className="cursor-pointer" onClick={() =>  searchCountry(inputText, arrayToRender)} />
+                    <MagnifyingGlass size={20} className="cursor-pointer"
+                        onClick={() => searchCountry(inputText, data)}
+                    />
                     <input type="text" onKeyDown={e => {
-                        if(e.key === "Enter"){
-                            searchCountry(inputText, arrayToSearch)
+                        if (e.key === "Enter") {
+                            searchCountry(inputText, data)
                         }
-                    }} onChange={e => searchCountry(e.target.value, arrayToSearch)} className="outline-none bg-transparent" placeholder="Search for a country" />
+                    }}
+                        onChange={e => searchCountry(e.target.value, data)}
+                        className="outline-none bg-transparent" placeholder="Search for a country" />
                 </div>
 
-                <select onChange={e => renderByRegion(Number(e.target.value))} name="region" id="region" className="dark:bg-blue-700 transition-colors bg-gray-200 outline-none p-4 w-[250px] border-none rounded shadow-md" placeholder="Filter by region">
-                    <option value="0">All</option>
-                    <option value="1">Africa</option>
-                    <option value="2">Americas</option>
-                    <option value="3">Asia</option>
-                    <option value="4">Europe</option>
-                    <option value="5">Oceania</option>
+                <select name="region" id="region" onChange={(e) => setRegionId(e.target.value)} className="dark:bg-blue-700 transition-colors bg-gray-200 outline-none p-4 w-[250px] border-none rounded shadow-md" placeholder="Filter by region">
+                    <option value="all">All</option>
+                    <option value="africa">Africa</option>
+                    <option value="americas">Americas</option>
+                    <option value="asia">Asia</option>
+                    <option value="europe">Europe</option>
+                    <option value="oceania">Oceania</option>
                 </select>
 
             </div>
+
+            {isFetching ? <Loading /> : <></>}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-12 ">
-                {arrayToRender.map(country => <Country key={country.name} name={country.name} population={country.population} region={country.region} capital={country.capital} img={country.flag} />)}
+                {isFetching ? <></> :
+                    arrayToRender.map(country => <Country key={country.name} name={country.name} population={country.population} region={country.region} capital={country.capital} img={country.flag} />)
+
+                }
             </div>
         </main>
     )
