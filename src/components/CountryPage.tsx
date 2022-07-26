@@ -17,6 +17,8 @@ export const CountryPage = () => {
         const result = await axios.get(url)
         console.log(result.data[0].languages)
         return result.data[0]
+    }, {
+        refetchOnWindowFocus: false
     })
 
 
