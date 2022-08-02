@@ -1,9 +1,9 @@
 import { MagnifyingGlass } from "phosphor-react"
-import { Country } from "./Country"
+import { Country } from "../components/Country"
 import axios from 'axios'
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useQuery } from 'react-query'
-import { Loading } from "./Loading"
+import { Loading } from "../components/Loading"
 
 interface CountryPageInterface {
     name: string;
@@ -14,7 +14,7 @@ interface CountryPageInterface {
 }
 
 
-export const Page = () => {
+export const Home = () => {
 
     const [regionId, setRegionId] = useState("all")
 
@@ -36,41 +36,20 @@ export const Page = () => {
         refetchOnMount: false
     })
 
-    const [inputText] = useState("")
+    const [inputText, setText] = useState("")
     const [arrayToRender, setArray] = useState<CountryPageInterface[]>(data)
 
+    const filteredArray = inputText.length > 0 ? arrayToRender.filter(country => country.name.toLowerCase().includes(inputText)) : []
 
-    const searchCountry = (country: string, array: CountryPageInterface[]) => {
-        if (country !== "") {
-            const countryLower = country.toLowerCase()
-
-            const newArray = array.filter(item => {
-                const itemName = item.name.toLowerCase()
-                if (itemName.includes(countryLower)) {
-                    return item
-                }
-            })
-
-            return setArray(newArray)
-
-        }
-        return setArray(array)
-
-    }
 
     return (
         <main className="w-11/12">
             <div className="flex flex-col gap-8 sm:justify-between sm:items-center sm:flex-row">
                 <div className="dark:bg-blue-700 transition-colors bg-gray-200 shadow-md flex items-center gap-4 rounded-md p-4 w-full sm:w-[400px]">
                     <MagnifyingGlass size={20} className="cursor-pointer"
-                        onClick={() => searchCountry(inputText, data)}
                     />
-                    <input type="text" onKeyDown={e => {
-                        if (e.key === "Enter") {
-                            searchCountry(inputText, data)
-                        }
-                    }}
-                        onChange={e => searchCountry(e.target.value, data)}
+                    <input type="text"
+                        onChange={e => setText(e.target.value)}
                         className="outline-none bg-transparent" placeholder="Search for a country" />
                 </div>
 
@@ -87,9 +66,11 @@ export const Page = () => {
 
             {isFetching ? <Loading /> : <></>}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-12 ">
-                {isFetching ? <></> :
-                    arrayToRender.map(country => <Country key={country.name} name={country.name} population={country.population} region={country.region} capital={country.capital} img={country.flag} />)
-
+                {!isFetching && inputText.length === 0 ? arrayToRender.map(country => <Country key={country.name} name={country.name} population={country.population} region={country.region} capital={country.capital} img={country.flag} />) :
+                    <></>
+                }
+                 {!isFetching && inputText.length > 0 ? filteredArray.map(country => <Country key={country.name} name={country.name} population={country.population} region={country.region} capital={country.capital} img={country.flag} />) :
+                    <></>
                 }
             </div>
         </main>

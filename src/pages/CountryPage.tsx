@@ -1,11 +1,10 @@
 import { ArrowLeft } from "phosphor-react"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Link, useParams } from "react-router-dom"
-import { CountryLink } from "./CountryLink"
 import { useQuery } from 'react-query'
 import axios from 'axios'
-import { Loading } from "./Loading"
-import { CountryInfo } from "./CountryInfo"
+import { Loading } from "../components/Loading"
+import { CountryInfo } from "../components/CountryInfo"
 
 
 export const CountryPage = () => {

@@ -1,11 +1,11 @@
 import { Route, Routes } from "react-router-dom"
-import { CountryPage } from "./components/CountryPage"
-import { Page } from "./components/Page"
+import { CountryPage } from "./pages/CountryPage"
+import { Home } from "./pages/Home"
 
 export const Router = () =>{
     return (
         <Routes>
-            <Route path="/" element={<Page />} />
+            <Route path="/" element={<Home />} />
             <Route path="/country/:country" element={<CountryPage />} />
         </Routes>
     )

@@ -1,5 +1,4 @@
 import { Header } from "./components/Header"
-import { Page } from "./components/Page"
 import { Router } from "./Router"
 import './styles/global.css'
 
