@@ -31,7 +31,7 @@ export const Home = () => {
 
     }
 
-    const { data, isFetching, refetch } = useQuery<CountryPageInterface>(['countries', regionId], () => fetchCountries(regionId), {
+    const { data, isFetching } = useQuery<CountryPageInterface>(['countries', regionId], () => fetchCountries(regionId), {
         refetchOnWindowFocus: false,
         refetchOnMount: false
     })
